@@ -5,7 +5,7 @@ wheel="${1:?wheel path required}"
 root=$(cd "$(dirname "$0")/.." && pwd)
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
-tag=$(curl -fsSL --retry 3 https://api.github.com/repos/home-assistant/core/releases/latest | jq -er '.tag_name | select(test("^[0-9]{4}\\.[0-9]+\\.[0-9]+$"))')
+tag=$(curl -fsSL --retry 3 https://pypi.org/pypi/homeassistant/json | jq -er '.info.version | select(test("^[0-9]{4}\\.[0-9]+\\.[0-9]+$"))')
 source_url="https://raw.githubusercontent.com/home-assistant/core/$tag"
 python=$(curl -fsSL --retry 3 "$source_url/.python-version")
 echo "Testing Home Assistant $tag on Python $python"
