@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check commit sign-offs
+        if: github.event_name == 'pull_request' || github.event_name == 'push'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: tools/check-dco.sh "$BASE" "$HEAD"
+      - run: tools/setup-ci.sh
+      - run: tools/check.sh "$RUNNER_TEMP/dist"
+      - name: Install and test the source distribution on the minimum supported Python
+        run: tools/test-distribution.sh "$RUNNER_TEMP"/dist/*.tar.gz 3.11
+      - name: Install and test the wheel on the SDK toolchain
+        run: tools/test-distribution.sh "$RUNNER_TEMP"/dist/*.whl "$UV_PYTHON"
+      - name: Match the release tag to the built version
+        if: inputs.release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(uv run --locked python -c 'from importlib.metadata import version; print(version("aiosavorum"))')
+          test "$RELEASE_TAG" = "v$version"
+          test -f "$RUNNER_TEMP/dist/aiosavorum-$version-py3-none-any.whl"
+          test -f "$RUNNER_TEMP/dist/aiosavorum-$version.tar.gz"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: inputs.release
+        with:
+          name: dist
+          path: ${{ runner.temp }}/dist/
+          retention-days: 2

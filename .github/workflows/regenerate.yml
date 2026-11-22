@@ -1,0 +1,74 @@
+name: Update API contract
+
+on:
+  schedule:
+    - cron: "41 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: regenerate
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: tools/setup-ci.sh
+      - run: python3 tools/regenerate.py --fetch
+      - id: diff
+        run: |
+          git add -- api/openapi.json api/upstream.json aiosavorum/_generated
+          if ! git diff --cached --quiet; then
+            git diff --cached --binary > "$RUNNER_TEMP/contract.patch"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.diff.outputs.changed == 'true'
+        run: |
+          tools/check.sh "$RUNNER_TEMP/dist"
+          tools/test-distribution.sh "$RUNNER_TEMP"/dist/*.whl "$UV_PYTHON"
+      - if: steps.diff.outputs.changed == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: contract
+          path: ${{ runner.temp }}/contract.patch
+          retention-days: 1
+
+  propose:
+    needs: generate
+    if: needs.generate.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: contract
+          path: ${{ runner.temp }}/contract
+      - name: Apply the reviewed file scope
+        run: |
+          git apply --include='api/openapi.json' --include='api/upstream.json' \
+            --include='aiosavorum/_generated/*' "$RUNNER_TEMP/contract/contract.patch"
+      - uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1 # v8.1.3
+        with:
+          base: main
+          branch: bot/openapi
+          title: Update the Savorum API contract
+          commit-message: Update the Savorum API contract
+          author: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>
+          signoff: true
+          body: The pinned schema and generated client passed the SDK checks.

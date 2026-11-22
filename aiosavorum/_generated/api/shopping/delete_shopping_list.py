@@ -1,0 +1,222 @@
+from http import HTTPStatus
+from typing import Any, cast
+from urllib.parse import quote
+
+import httpx2
+
+from ...client import AuthenticatedClient, Client
+from ...types import Response, UNSET
+from ... import errors
+
+from ...models.account_problem import AccountProblem
+from ...models.error_model import ErrorModel
+from ...types import UNSET, Unset
+from typing import cast
+
+
+
+def _get_kwargs(
+    list_id: str,
+    *,
+    x_savorum_library: str | Unset = UNSET,
+    x_savorum_principal: str | Unset = UNSET,
+
+) -> dict[str, Any]:
+    headers: dict[str, Any] = {}
+    if not isinstance(x_savorum_library, Unset):
+        headers["X-Savorum-Library"] = x_savorum_library
+
+    if not isinstance(x_savorum_principal, Unset):
+        headers["X-Savorum-Principal"] = x_savorum_principal
+
+
+
+    
+
+    
+
+    _kwargs: dict[str, Any] = {
+        "method": "delete",
+        "url": "/api/v1/shopping/lists/{list_id}".format(list_id=quote(str(list_id), safe=""),),
+    }
+
+
+    _kwargs["headers"] = headers
+    return _kwargs
+
+
+
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx2.Response) -> AccountProblem | Any | ErrorModel:
+    if response.status_code == 204:
+        response_204 = cast(Any, None)
+        return response_204
+
+    if response.status_code == 401:
+        response_401 = AccountProblem.from_dict(response.json())
+
+
+
+        return response_401
+
+    response_default = ErrorModel.from_dict(response.json())
+
+
+
+    return response_default
+
+
+
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx2.Response) -> Response[AccountProblem | Any | ErrorModel]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    list_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    x_savorum_library: str | Unset = UNSET,
+    x_savorum_principal: str | Unset = UNSET,
+
+) -> Response[AccountProblem | Any | ErrorModel]:
+    """ Delete a named shopping list
+
+     Removes the list, its items and its history. The household's Groceries list cannot be deleted.
+
+    Args:
+        list_id (str):
+        x_savorum_library (str | Unset):
+        x_savorum_principal (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[AccountProblem | Any | ErrorModel]
+     """
+
+
+    kwargs = _get_kwargs(
+        list_id=list_id,
+x_savorum_library=x_savorum_library,
+x_savorum_principal=x_savorum_principal,
+
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+def sync(
+    list_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    x_savorum_library: str | Unset = UNSET,
+    x_savorum_principal: str | Unset = UNSET,
+
+) -> AccountProblem | Any | ErrorModel | None:
+    """ Delete a named shopping list
+
+     Removes the list, its items and its history. The household's Groceries list cannot be deleted.
+
+    Args:
+        list_id (str):
+        x_savorum_library (str | Unset):
+        x_savorum_principal (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        AccountProblem | Any | ErrorModel
+     """
+
+
+    return sync_detailed(
+        list_id=list_id,
+client=client,
+x_savorum_library=x_savorum_library,
+x_savorum_principal=x_savorum_principal,
+
+    ).parsed
+
+async def asyncio_detailed(
+    list_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    x_savorum_library: str | Unset = UNSET,
+    x_savorum_principal: str | Unset = UNSET,
+
+) -> Response[AccountProblem | Any | ErrorModel]:
+    """ Delete a named shopping list
+
+     Removes the list, its items and its history. The household's Groceries list cannot be deleted.
+
+    Args:
+        list_id (str):
+        x_savorum_library (str | Unset):
+        x_savorum_principal (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[AccountProblem | Any | ErrorModel]
+     """
+
+
+    kwargs = _get_kwargs(
+        list_id=list_id,
+x_savorum_library=x_savorum_library,
+x_savorum_principal=x_savorum_principal,
+
+    )
+
+    response = await client.get_async_httpx_client().request(
+        **kwargs
+    )
+
+    return _build_response(client=client, response=response)
+
+async def asyncio(
+    list_id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    x_savorum_library: str | Unset = UNSET,
+    x_savorum_principal: str | Unset = UNSET,
+
+) -> AccountProblem | Any | ErrorModel | None:
+    """ Delete a named shopping list
+
+     Removes the list, its items and its history. The household's Groceries list cannot be deleted.
+
+    Args:
+        list_id (str):
+        x_savorum_library (str | Unset):
+        x_savorum_principal (str | Unset):
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        AccountProblem | Any | ErrorModel
+     """
+
+
+    return (await asyncio_detailed(
+        list_id=list_id,
+client=client,
+x_savorum_library=x_savorum_library,
+x_savorum_principal=x_savorum_principal,
+
+    )).parsed

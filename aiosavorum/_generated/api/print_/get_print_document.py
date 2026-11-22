@@ -1,0 +1,239 @@
+from http import HTTPStatus
+from typing import Any, cast
+from urllib.parse import quote
+
+import httpx2
+
+from ...client import AuthenticatedClient, Client
+from ...types import Response, UNSET
+from ... import errors
+
+from ...models.account_problem import AccountProblem
+from ...models.error_model import ErrorModel
+from ...types import UNSET, Unset
+from typing import cast
+
+
+
+def _get_kwargs(
+    id: str,
+    *,
+    download: bool | Unset = UNSET,
+
+) -> dict[str, Any]:
+    
+
+    
+
+    params: dict[str, Any] = {}
+
+    params["download"] = download
+
+
+    params = {k: v for k, v in params.items() if v is not UNSET and v is not None}
+
+
+    _kwargs: dict[str, Any] = {
+        "method": "get",
+        "url": "/api/v1/print/documents/{id}".format(id=quote(str(id), safe=""),),
+        "params": params,
+    }
+
+
+    return _kwargs
+
+
+
+def _parse_response(*, client: AuthenticatedClient | Client, response: httpx2.Response) -> AccountProblem | ErrorModel | None:
+    if response.status_code == 401:
+        response_401 = AccountProblem.from_dict(response.json())
+
+
+
+        return response_401
+
+    if response.status_code == 404:
+        response_404 = ErrorModel.from_dict(response.json())
+
+
+
+        return response_404
+
+    if response.status_code == 422:
+        response_422 = ErrorModel.from_dict(response.json())
+
+
+
+        return response_422
+
+    if response.status_code == 500:
+        response_500 = ErrorModel.from_dict(response.json())
+
+
+
+        return response_500
+
+    if client.raise_on_unexpected_status:
+        raise errors.UnexpectedStatus(response.status_code, response.content)
+    else:
+        return None
+
+
+def _build_response(*, client: AuthenticatedClient | Client, response: httpx2.Response) -> Response[AccountProblem | ErrorModel]:
+    return Response(
+        status_code=HTTPStatus(response.status_code),
+        content=response.content,
+        headers=response.headers,
+        parsed=_parse_response(client=client, response=response),
+    )
+
+
+def sync_detailed(
+    id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    download: bool | Unset = UNSET,
+
+) -> Response[AccountProblem | ErrorModel]:
+    """ Get a print document
+
+     Returns the exact bytes the preview showed when the generated document is still held for the same
+    authorization scope. Downloading and printing read the same document rather than generating it a
+    second time. The identifier signs the renderer, effective title, source identity and revision,
+    authorization scope, recipe revisions, preferences, and print options, so it can only ever name
+    these bytes.
+
+    Args:
+        id (str): Generated document identifier
+        download (bool | Unset): Offer the document as a download rather than for viewing
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[AccountProblem | ErrorModel]
+     """
+
+
+    kwargs = _get_kwargs(
+        id=id,
+download=download,
+
+    )
+
+    response = client.get_httpx_client().request(
+        **kwargs,
+    )
+
+    return _build_response(client=client, response=response)
+
+def sync(
+    id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    download: bool | Unset = UNSET,
+
+) -> AccountProblem | ErrorModel | None:
+    """ Get a print document
+
+     Returns the exact bytes the preview showed when the generated document is still held for the same
+    authorization scope. Downloading and printing read the same document rather than generating it a
+    second time. The identifier signs the renderer, effective title, source identity and revision,
+    authorization scope, recipe revisions, preferences, and print options, so it can only ever name
+    these bytes.
+
+    Args:
+        id (str): Generated document identifier
+        download (bool | Unset): Offer the document as a download rather than for viewing
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        AccountProblem | ErrorModel
+     """
+
+
+    return sync_detailed(
+        id=id,
+client=client,
+download=download,
+
+    ).parsed
+
+async def asyncio_detailed(
+    id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    download: bool | Unset = UNSET,
+
+) -> Response[AccountProblem | ErrorModel]:
+    """ Get a print document
+
+     Returns the exact bytes the preview showed when the generated document is still held for the same
+    authorization scope. Downloading and printing read the same document rather than generating it a
+    second time. The identifier signs the renderer, effective title, source identity and revision,
+    authorization scope, recipe revisions, preferences, and print options, so it can only ever name
+    these bytes.
+
+    Args:
+        id (str): Generated document identifier
+        download (bool | Unset): Offer the document as a download rather than for viewing
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        Response[AccountProblem | ErrorModel]
+     """
+
+
+    kwargs = _get_kwargs(
+        id=id,
+download=download,
+
+    )
+
+    response = await client.get_async_httpx_client().request(
+        **kwargs
+    )
+
+    return _build_response(client=client, response=response)
+
+async def asyncio(
+    id: str,
+    *,
+    client: AuthenticatedClient | Client,
+    download: bool | Unset = UNSET,
+
+) -> AccountProblem | ErrorModel | None:
+    """ Get a print document
+
+     Returns the exact bytes the preview showed when the generated document is still held for the same
+    authorization scope. Downloading and printing read the same document rather than generating it a
+    second time. The identifier signs the renderer, effective title, source identity and revision,
+    authorization scope, recipe revisions, preferences, and print options, so it can only ever name
+    these bytes.
+
+    Args:
+        id (str): Generated document identifier
+        download (bool | Unset): Offer the document as a download rather than for viewing
+
+    Raises:
+        errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
+        httpx2.TimeoutException: If the request takes longer than Client.timeout.
+
+    Returns:
+        AccountProblem | ErrorModel
+     """
+
+
+    return (await asyncio_detailed(
+        id=id,
+client=client,
+download=download,
+
+    )).parsed
